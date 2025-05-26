@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestore Smart Working</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f9fafb;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        h1 {
+            color: #1f2937;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .btn {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-success {
+            background: #16a34a;
+        }
+        
+        .btn-success:hover {
+            background: #15803d;
+        }
+        
+        .btn-danger {
+            background: #dc2626;
+        }
+        
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        
+        .btn-gray {
+            background: #6b7280;
+        }
+        
+        .btn-gray:hover {
+            background: #4b5563;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .stat-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .stat-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .stat-auto {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+        
+        /* Calendario */
+        .calendar-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .calendar-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .calendar-nav {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .nav-btn {
+            background: #f3f4f6;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            color: #374151;
+        }
+        
+        .nav-btn:hover {
+            background: #e5e7eb;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+        }
+        
+        .calendar-day-header {
+            text-align: center;
+            padding: 8px;
+            font-weight: 600;
+            color: #6b7280;
+            font-size: 12px;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 4px 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+        
+        .calendar-day:hover {
+            background: #f3f4f6;
+        }
+        
+        .calendar-day.other-month {
+            color: #d1d5db;
+        }
+        
+        .calendar-day.today {
+            background: #dbeafe;
+            color: #1e40af;
+            font-weight: bold;
+        }
+        
+        .calendar-day.first-thursday {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .calendar-day.first-thursday::after {
+            content: "❌";
+            position: absolute;
+            bottom: 2px;
+            font-size: 8px;
+        }
+        
+        .smart-indicators {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1px;
+            margin-top: 2px;
+        }
+        
+        .smart-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+        
+        .smart-dot.pending {
+            background: #f59e0b;
+        }
+        
+        .smart-dot.rejected {
+            background: #ef4444;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        select:focus, input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        .request-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .request-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+        
+        .request-date {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .request-time {
+            color: #9ca3af;
+            font-size: 12px;
+        }
+        
+        .request-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .alert {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+        
+        .alert-title {
+            font-weight: 600;
+            color: #991b1b;
+            margin-bottom: 8px;
+        }
+        
+        .alert-text {
+            color: #7f1d1d;
+            font-size: 14px;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-auto {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .status-rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+        
+        .pending-title {
+            color: #92400e;
+        }
+        
+        .week-summary {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        .week-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+        
+        .week-day {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .week-day:last-child {
+            border-bottom: none;
+        }
+        
+        .day-name {
+            font-weight: 500;
+            color: #374151;
+        }
+        
+        .day-smart-list {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .smart-person {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        
+        .smart-person.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .legend {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+            font-size: 12px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        @media (max-width: 1024px) {
+            .calendar-section {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .calendar-day {
+                font-size: 10px;
+                padding: 2px 1px;
+            }
+            
+            .smart-dot {
+                width: 4px;
+                height: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Schermata di Login -->
+    <div id="loginScreen" class="container">
+        <div class="card" style="max-width: 400px; margin: 100px auto;">
+            <h1 style="text-align: center; margin-bottom: 30px;">🔐 Accesso Smart Working</h1>
+            <div class="form-group">
+                <label>Seleziona Modalità</label>
+                <select id="userMode" onchange="togglePasswordField()">
+                    <option value="team">👥 Membro del Team</option>
+                    <option value="manager">👨‍💼 Team Leader</option>
+                </select>
+            </div>
+            <div class="form-group hidden" id="passwordField">
+                <label>Password Team Leader</label>
+                <input type="password" id="managerPassword" placeholder="Inserisci la password">
+            </div>
+            <button class="btn" onclick="login()" style="width: 100%;">Accedi</button>
+        </div>
+    </div>
+
+    <div class="container hidden" id="mainApp">
+        <div class="card">
+            <div class="header">
+                <div>
+                    <h1>📅 Gestore Smart Working</h1>
+                    <div style="font-size: 14px; color: #6b7280; margin-top: 4px;">
+                        Modalità: <span id="currentMode">Team</span> 
+                        <span id="managerBadge" class="hidden" style="background: #dc2626; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 8px;">TEAM LEADER</span>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn" onclick="showNewRequestForm()">Nuova Richiesta</button>
+                    <button class="btn btn-gray" onclick="logout()">Logout</button>
+                </div>
+            </div>
+            
+            <div class="stats">
+                <div class="stat-card stat-pending">
+                    <div>⏰ In Attesa</div>
+                    <div class="stat-number" id="pendingCount">0</div>
+                </div>
+                <div class="stat-card stat-approved">
+                    <div>✅ Approvate Oggi</div>
+                    <div class="stat-number" id="approvedCount">0</div>
+                </div>
+                <div class="stat-card stat-auto">
+                    <div>🤖 Auto-approvate</div>
+                    <div class="stat-number" id="autoCount">0</div>
+                </div>
+            </div>
+
+            <!-- Controlli Team Leader -->
+            <div id="managerControls" class="hidden" style="background: #fef2f2; border: 2px solid #dc2626; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                <h3 style="color: #dc2626; margin-bottom: 12px;">🔧 Controlli Team Leader</h3>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn btn-danger" onclick="overrideFirstThursday()">Sblocca Primo Giovedì</button>
+                    <button class="btn" onclick="bulkApprove()">Approva Tutto in Attesa</button>
+                    <button class="btn btn-gray" onclick="exportData()">Esporta Dati</button>
+                    <button class="btn btn-gray" onclick="showManagerStats()">Statistiche Avanzate</button>
+                </div>
+                <div style="margin-top: 12px;">
+                    <label style="display: flex; align-items: center; gap: 8px; color: #dc2626;">
+                        <input type="checkbox" id="overrideMode">
+                        <span>Modalità Override: Ignora tutti i limiti e conflitti</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendario e Riepilogo Settimana -->
+        <div class="calendar-section">
+            <div class="calendar-container">
+                <div class="calendar-header">
+                    <h2 class="calendar-title" id="calendarTitle">Maggio 2025</h2>
+                    <div class="calendar-nav">
+                        <button class="nav-btn" onclick="changeMonth(-1)">◀</button>
+                        <button class="nav-btn" onclick="changeMonth(1)">▶</button>
+                    </div>
+                </div>
+                <div class="calendar-grid" id="calendarGrid">
+                    <!-- Il calendario verrà generato qui -->
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="smart-dot"></div>
+                        <span>Approvato</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="smart-dot pending"></div>
+                        <span>In attesa</span>
+                    </div>
+                    <div class="legend-item">
+                        <span style="color: #991b1b;">❌ Primo giovedì</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="week-summary">
+                <div class="week-header">Settimana Corrente</div>
+                <div id="weekSummary">
+                    <!-- Il riepilogo della settimana verrà generato qui -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Form nuova richiesta -->
+        <div class="card hidden" id="newRequestForm">
+            <h2 class="section-title">Nuova Richiesta Smart Working</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nome</label>
+                    <select id="requestName">
+                        <option value="">Seleziona persona</option>
+                        <option value="Noemi Gornati">Noemi Gornati</option>
+                        <option value="Carlotta Rubinato">Carlotta Rubinato</option>
+                        <option value="Arianna Sciascia">Arianna Sciascia</option>
+                        <option value="Filippo Bosco">Filippo Bosco</option>
+                        <option value="Sara Recchimuzzi">Sara Recchimuzzi</option>
+                        <option value="Martina Chiodini">Martina Chiodini</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Data</label>
+                    <input type="date" id="requestDate">
+                </div>
+            </div>
+            <div id="dateWarning" class="alert hidden">
+                <div class="alert-title">⚠️ Attenzione:</div>
+                <div class="alert-text">Il primo giovedì del mese non è disponibile per lo smart working!</div>
+            </div>
+            <div style="display: flex; gap: 12px;">
+                <button class="btn" onclick="submitRequest()">Invia Richiesta</button>
+                <button class="btn btn-gray" onclick="hideNewRequestForm()">Annulla</button>
+            </div>
+        </div>
+
+        <!-- Richieste in attesa -->
+        <div class="card hidden" id="pendingSection">
+            <h2 class="section-title pending-title">Richieste in Attesa della Tua Approvazione</h2>
+            <div id="pendingRequests">
+                <!-- Le richieste in attesa verranno generate qui -->
+            </div>
+        </div>
+
+        <!-- Cronologia -->
+        <div class="card">
+            <h2 class="section-title">Cronologia Richieste</h2>
+            <div id="historyRequests">
+                <div style="text-align: center; color: #6b7280; padding: 40px;">
+                    Nessuna richiesta ancora presente
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variabili globali
+        let requests = [];
+        let currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+        let currentUser = null; // 'team' o 'manager'
+        let overrideMode = false;
+        let firstThursdayOverride = false;
+
+        const MANAGER_PASSWORD = "smart2025"; // Cambia questa password!
+
+        const conflicts = [
+            { person1: 'Filippo Bosco', person2: 'Noemi Gornati' },
+            { person1: 'Arianna Sciascia', person2: 'Martina Chiodini' },
+            { person1: 'Sara Recchimuzzi', person2: 'Carlotta Rubinato' }
+        ];
+
+        const monthNames = [
+            'Gennaio', 'Febbraio', 'Marzo', 'Aprile', 'Maggio', 'Giugno',
+            'Luglio', 'Agosto', 'Settembre', 'Ottobre', 'Novembre', 'Dicembre'
+        ];
+
+        const dayNames = ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab'];
+
+        // Funzioni di autenticazione
+        function togglePasswordField() {
+            const mode = document.getElementById('userMode').value;
+            const passwordField = document.getElementById('passwordField');
+            
+            if (mode === 'manager') {
+                passwordField.classList.remove('hidden');
+            } else {
+                passwordField.classList.add('hidden');
+            }
+        }
+
+        function login() {
+            const mode = document.getElementById('userMode').value;
+            const password = document.getElementById('managerPassword').value;
+
+            if (mode === 'manager' && password !== MANAGER_PASSWORD) {
+                alert('Password Team Leader non corretta!');
+                return;
+            }
+
+            currentUser = mode;
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            
+            updateUIForUser();
+            updateDisplay();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('userMode').value = 'team';
+            document.getElementById('managerPassword').value = '';
+            document.getElementById('passwordField').classList.add('hidden');
+        }
+
+        function updateUIForUser() {
+            const isManager = currentUser === 'manager';
+            
+            document.getElementById('currentMode').textContent = isManager ? 'Team Leader' : 'Team';
+            
+            if (isManager) {
+                document.getElementById('managerBadge').classList.remove('hidden');
+                document.getElementById('managerControls').classList.remove('hidden');
+                document.querySelectorAll('.manager-only').forEach(el => el.classList.remove('hidden'));
+            } else {
+                document.getElementById('managerBadge').classList.add('hidden');
+                document.getElementById('managerControls').classList.add('hidden');
+                document.querySelectorAll('.manager-only').forEach(el => el.classList.add('hidden'));
+            }
+        }
+
+        // Funzioni manager avanzate
+        function overrideFirstThursday() {
+            firstThursdayOverride = !firstThursdayOverride;
+            const btn = event.target;
+            if (firstThursdayOverride) {
+                btn.textContent = 'Blocca Primo Giovedì';
+                btn.classList.remove('btn-danger');
+                btn.classList.add('btn-success');
+                alert('✅ Primo giovedì sbloccato! Ora si possono fare richieste.');
+            } else {
+                btn.textContent = 'Sblocca Primo Giovedì';
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-danger');
+                alert('❌ Primo giovedì bloccato normalmente.');
+            }
+        }
+
+        function bulkApprove() {
+            const pending = requests.filter(req => req.status === 'pending');
+            if (pending.length === 0) {
+                alert('Nessuna richiesta in attesa!');
+                return;
+            }
+
+            if (confirm(`Vuoi approvare tutte le ${pending.length} richieste in attesa?`)) {
+                pending.forEach(req => {
+                    req.status = 'approved';
+                });
+                updateDisplay();
+                alert(`✅ Approvate ${pending.length} richieste!`);
+            }
+        }
+
+        function forceApprove(id, name, date) {
+            if (confirm(`Vuoi FORZARE l'approvazione per ${name} il ${date}?\nQuesto ignora tutti i limiti e conflitti.`)) {
+                requests = requests.map(req => 
+                    req.id === id ? { ...req, status: 'approved', forced: true } : req
+                );
+                updateDisplay();
+                alert(`🔨 APPROVAZIONE FORZATA per ${name}!`);
+            }
+        }
+
+        function revokeRequest(id) {
+            const request = requests.find(req => req.id === id);
+            if (confirm(`Vuoi revocare la richiesta di ${request.name} per il ${new Date(request.date).toLocaleDateString('it-IT')}?`)) {
+                requests = requests.map(req => 
+                    req.id === id ? { ...req, status: 'revoked' } : req
+                );
+                updateDisplay();
+                alert(`❌ Richiesta revocata per ${request.name}!`);
+            }
+        }
+
+        function exportData() {
+            const data = {
+                requests: requests,
+                conflicts: conflicts,
+                exportDate: new Date().toISOString(),
+                totalRequests: requests.length,
+                approvedRequests: requests.filter(r => r.status === 'approved' || r.status === 'auto-approved').length
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `smart-working-export-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            alert('📊 Dati esportati con successo!');
+        }
+
+        function showManagerStats() {
+            const total = requests.length;
+            const approved = requests.filter(r => r.status === 'approved' || r.status === 'auto-approved').length;
+            const pending = requests.filter(r => r.status === 'pending').length;
+            const rejected = requests.filter(r => r.status === 'rejected').length;
+            const forced = requests.filter(r => r.forced).length;
+            
+            const teamStats = {};
+            requests.forEach(req => {
+                if (!teamStats[req.name]) teamStats[req.name] = 0;
+                if (req.status === 'approved' || req.status === 'auto-approved') {
+                    teamStats[req.name]++;
+                }
+            });
+            
+            let statsText = `📊 STATISTICHE TEAM LEADER\n\n`;
+            statsText += `Richieste totali: ${total}\n`;
+            statsText += `Approvate: ${approved}\n`;
+            statsText += `In attesa: ${pending}\n`;
+            statsText += `Rifiutate: ${rejected}\n`;
+            statsText += `Forzate: ${forced}\n\n`;
+            statsText += `📈 PER PERSONA:\n`;
+            
+            Object.entries(teamStats).forEach(([name, count]) => {
+                statsText += `${name}: ${count} giorni\n`;
+            });
+            
+            alert(statsText);
+        }
+        function getFirstThursday(year, month) {
+            const date = new Date(year, month, 1);
+            while (date.getDay() !== 4) { // 4 = giovedì
+                date.setDate(date.getDate() + 1);
+            }
+            return date.getDate();
+        }
+
+        // Controlla se una data è il primo giovedì del mese
+        function isFirstThursday(date) {
+            if (firstThursdayOverride) return false; // Manager ha sbloccato
+            const d = new Date(date);
+            const firstThursday = getFirstThursday(d.getFullYear(), d.getMonth());
+            return d.getDate() === firstThursday && d.getDay() === 4;
+        }
+
+        // Impostazione data minima
+        function updateDateInput() {
+            const today = new Date();
+            document.getElementById('requestDate').min = today.toISOString().split('T')[0];
+            
+            // Listener per controllare il primo giovedì
+            document.getElementById('requestDate').addEventListener('change', function() {
+                const selectedDate = this.value;
+                const warning = document.getElementById('dateWarning');
+                
+                if (selectedDate && isFirstThursday(selectedDate)) {
+                    warning.classList.remove('hidden');
+                } else {
+                    warning.classList.add('hidden');
+                }
+            });
+        }
+
+        function showNewRequestForm() {
+            document.getElementById('newRequestForm').classList.remove('hidden');
+        }
+
+        function hideNewRequestForm() {
+            document.getElementById('newRequestForm').classList.add('hidden');
+            document.getElementById('requestName').value = '';
+            document.getElementById('requestDate').value = '';
+            document.getElementById('dateWarning').classList.add('hidden');
+        }
+
+        function checkConflict(person1, person2) {
+            return conflicts.some(conflict => 
+                (conflict.person1 === person1 && conflict.person2 === person2) ||
+                (conflict.person1 === person2 && conflict.person2 === person1)
+            );
+        }
+
+        function canAutoApprove(newRequest) {
+            // Se il manager ha attivato l'override, approva sempre
+            if (overrideMode && currentUser === 'manager') return true;
+            
+            const sameDate = requests.filter(req => 
+                req.date === newRequest.date && 
+                (req.status === 'approved' || req.status === 'auto-approved')
+            );
+
+            if (sameDate.length >= 2) return false;
+
+            for (let req of sameDate) {
+                if (checkConflict(newRequest.name, req.name)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function submitRequest() {
+            const name = document.getElementById('requestName').value;
+            const date = document.getElementById('requestDate').value;
+
+            if (!name || !date) {
+                alert('Compila tutti i campi!');
+                return;
+            }
+
+            if (isFirstThursday(date) && currentUser !== 'manager') {
+                alert('Non è possibile richiedere smart working per il primo giovedì del mese!');
+                return;
+            }
+
+            // Controllo override mode
+            overrideMode = document.getElementById('overrideMode') ? document.getElementById('overrideMode').checked : false;
+
+            const newRequest = {
+                id: Date.now(),
+                name: name,
+                date: date,
+                status: canAutoApprove({ name, date }) ? 'auto-approved' : 'pending',
+                requestTime: new Date().toLocaleDateString('it-IT') + ' ' + new Date().toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'}),
+                requestedBy: currentUser
+            };
+
+            requests.push(newRequest);
+            updateDisplay();
+            hideNewRequestForm();
+
+            if (newRequest.status === 'auto-approved') {
+                alert(`✅ Richiesta AUTO-APPROVATA per ${name} il ${new Date(date).toLocaleDateString('it-IT')}!`);
+            }
+        }
+
+        function approveRequest(id, name, date) {
+            requests = requests.map(req => 
+                req.id === id ? { ...req, status: 'approved' } : req
+            );
+            updateDisplay();
+            alert(`✅ NOTIFICA INVIATA A: ${name}\n\n"La tua richiesta di smart working per il ${date} è stata APPROVATA!"`);
+        }
+
+        function rejectRequest(id, name, date) {
+            requests = requests.map(req => 
+                req.id === id ? { ...req, status: 'rejected' } : req
+            );
+            updateDisplay();
+            alert(`❌ NOTIFICA INVIATA A: ${name}\n\n"La tua richiesta di smart working per il ${date} è stata RIFIUTATA."`);
+        }
+
+        function changeMonth(direction) {
+            currentMonth += direction;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            generateCalendar();
+        }
+
+        function generateCalendar() {
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+            document.getElementById('calendarTitle').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+
+            // Headers dei giorni
+            dayNames.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                grid.appendChild(header);
+            });
+
+            // Giorni del calendario
+            const currentDateStr = new Date().toISOString().split('T')[0];
+            const firstThursday = getFirstThursday(currentYear, currentMonth);
+
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                
+                if (date.getMonth() !== currentMonth) {
+                    dayElement.classList.add('other-month');
+                }
+                
+                const dateStr = date.toISOString().split('T')[0];
+                
+                if (dateStr === currentDateStr) {
+                    dayElement.classList.add('today');
+                }
+                
+                if (date.getMonth() === currentMonth && date.getDate() === firstThursday && date.getDay() === 4) {
+                    dayElement.classList.add('first-thursday');
+                }
+                
+                dayElement.innerHTML = `
+                    <span>${date.getDate()}</span>
+                    <div class="smart-indicators" id="indicators-${dateStr}"></div>
+                `;
+                
+                grid.appendChild(dayElement);
+            }
+
+            updateCalendarIndicators();
+        }
+
+        function updateCalendarIndicators() {
+            // Pulisci tutti gli indicatori
+            document.querySelectorAll('.smart-indicators').forEach(el => {
+                el.innerHTML = '';
+            });
+
+            // Aggiungi indicatori per ogni richiesta
+            requests.forEach(request => {
+                const indicatorContainer = document.getElementById(`indicators-${request.date}`);
+                if (indicatorContainer) {
+                    const dot = document.createElement('div');
+                    dot.className = 'smart-dot';
+                    
+                    if (request.status === 'pending') {
+                        dot.classList.add('pending');
+                    } else if (request.status === 'rejected') {
+                        dot.classList.add('rejected');
+                    }
+                    
+                    indicatorContainer.appendChild(dot);
+                }
+            });
+        }
+
+        function updateWeekSummary() {
+            const today = new Date();
+            const currentWeekStart = new Date(today);
+            currentWeekStart.setDate(today.getDate() - today.getDay() + 1); // Lunedì
+
+            const weekSummary = document.getElementById('weekSummary');
+            weekSummary.innerHTML = '';
+
+            const weekDays = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì'];
+
+            weekDays.forEach((dayName, index) => {
+                const date = new Date(currentWeekStart);
+                date.setDate(currentWeekStart.getDate() + index);
+                const dateStr = date.toISOString().split('T')[0];
+
+                const dayRequests = requests.filter(req => 
+                    req.date === dateStr && 
+                    (req.status === 'approved' || req.status === 'auto-approved' || req.status === 'pending')
+                );
+
+                const dayElement = document.createElement('div');
+                dayElement.className = 'week-day';
+
+                const isFirstThursdayDay = isFirstThursday(dateStr);
+
+                dayElement.innerHTML = `
+                    <div class="day-name">
+                        ${dayName} ${date.getDate()}/${date.getMonth() + 1}
+                        ${isFirstThursdayDay ? ' ❌' : ''}
+                    </div>
+                    <div class="day-smart-list">
+                        ${dayRequests.length === 0 ? 
+                            '<span style="color: #6b7280; font-size: 12px;">Nessuno</span>' : 
+                            dayRequests.map(req => 
+                                `<span class="smart-person ${req.status === 'pending' ? 'pending' : ''}">${req.name}</span>`
+                            ).join('')
+                        }
+                    </div>
+                `;
+
+                weekSummary.appendChild(dayElement);
+            });
+        }
+
+        function updateStats() {
+            const pending = requests.filter(req => req.status === 'pending').length;
+            const approved = requests.filter(req => 
+                (req.status === 'approved' || req.status === 'auto-approved') &&
+                req.date === new Date().toISOString().split('T')[0]
+            ).length;
+            const auto = requests.filter(req => req.status === 'auto-approved').length;
+
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('approvedCount').textContent = approved;
+            document.getElementById('autoCount').textContent = auto;
+        }
+
+        function updatePendingRequests() {
+            const pendingRequests = requests.filter(req => req.status === 'pending');
+            const container = document.getElementById('pendingRequests');
+            const section = document.getElementById('pendingSection');
+            
+            if (pendingRequests.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+
+            section.classList.remove('hidden');
+            container.innerHTML = '';
+
+            pendingRequests.forEach(request => {
+                const approvedSameDate = requests.filter(req => 
+                    req.date === request.date && 
+                    req.id !== request.id && 
+                    (req.status === 'approved' || req.status === 'auto-approved')
+                );
+                
+                const hasConflicts = approvedSameDate.some(other => 
+                    checkConflict(request.name, other.name)
+                );
+                const exceedsLimit = approvedSameDate.length >= 2;
+
+                let conflictText = '';
+                if (exceedsLimit) conflictText += `• Limite giornaliero già raggiunto (${approvedSameDate.length}/2)<br>`;
+                if (hasConflicts) {
+                    const conflictNames = approvedSameDate
+                        .filter(other => checkConflict(request.name, other.name))
+                        .map(other => other.name)
+                        .join(', ');
+                    conflictText += `• Conflitto con: ${conflictNames}`;
+                }
+
+                container.innerHTML += `
+                    <div class="request-item">
+                        <div class="request-header">
+                            <div>
+                                <div class="request-name">${request.name}</div>
+                                <div class="request-date">${new Date(request.date).toLocaleDateString('it-IT')}</div>
+                                <div class="request-time">Richiesta il: ${request.requestTime}</div>
+                            </div>
+                            <div class="request-actions">
+                                <button class="btn btn-success" onclick="approveRequest(${request.id}, '${request.name}', '${new Date(request.date).toLocaleDateString('it-IT')}')">✅</button>
+                                <button class="btn btn-danger" onclick="rejectRequest(${request.id}, '${request.name}', '${new Date(request.date).toLocaleDateString('it-IT')}')">❌</button>
+                                <button class="btn btn-gray hidden manager-only" onclick="forceApprove(${request.id}, '${request.name}', '${new Date(request.date).toLocaleDateString('it-IT')}')">🔨 Forza</button>
+                            </div>
+                        </div>
+                        ${conflictText ? `
+                            <div class="alert">
+                                <div class="alert-title">⚠️ Attenzione:</div>
+                                <div class="alert-text">${conflictText}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+        }
+
+        function updateHistory() {
+            const historyRequests = requests.filter(req => req.status !== 'pending');
+            const container = document.getElementById('historyRequests');
+            
+            if (historyRequests.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: #6b7280; padding: 40px;">
+                        Nessuna richiesta ancora presente
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+
+            historyRequests.forEach(request => {
+                let statusClass = '';
+                let statusText = '';
+                
+                switch(request.status) {
+                    case 'approved': statusClass = 'status-approved'; statusText = 'Approvato'; break;
+                    case 'auto-approved': statusClass = 'status-auto'; statusText = 'Auto-approvato'; break;
+                    case 'rejected': statusClass = 'status-rejected'; statusText = 'Rifiutato'; break;
+                }
+
+                container.innerHTML += `
+                    <div class="request-item">
+                        <div class="request-header">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span class="request-name">${request.name}</span>
+                                    <span class="request-date">${new Date(request.date).toLocaleDateString('it-IT')}</span>
+                                    <span class="status-badge ${statusClass}">${statusText}</span>
+                                    <button class="btn btn-danger hidden manager-only" onclick="revokeRequest(${request.id})" style="padding: 2px 8px; font-size: 10px; margin-left: 8px;">Revoca</button>
+                                </div>
+                            </div>
+                            <div class="request-time">${request.requestTime}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function updateDisplay() {
+            updateStats();
+            updatePendingRequests();
+            updateHistory();
+            updateCalendarIndicators();
+            updateWeekSummary();
+        }
+
+        // Inizializzazione
+        function init() {
+            updateDateInput();
+            generateCalendar();
+            
+            // Mostra sempre la schermata di login all'inizio
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+        }
+
+        // Avvia l'applicazione
+        init();
+    </script>
+</body>
+</html>
